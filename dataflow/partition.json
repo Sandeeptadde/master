@@ -1,0 +1,28 @@
+{
+	"name": "partition",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "in_country",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText8",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [],
+			"script": "source(output(\n\t\tid as string,\n\t\t{ name } as string,\n\t\t{ country} as string,\n\t\t{ gender} as string,\n\t\t{ dep_id} as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tid as string,\n\t\t{ name } as string,\n\t\t{ country} as string,\n\t\t{ gender} as string,\n\t\t{ dep_id} as string\n\t),\n\tpartitionFileNames:['gender[n].csv'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tpartitionBy('hash', 3,\n\t\t{ gender}\n\t)) ~> sink1"
+		}
+	}
+}

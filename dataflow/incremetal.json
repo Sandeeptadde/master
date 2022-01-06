@@ -1,0 +1,55 @@
+{
+	"name": "incremetal",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ds_incremental",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "incremntal",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "incremntal",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "incremntal",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedColumn1"
+				},
+				{
+					"name": "Lookup1"
+				},
+				{
+					"name": "ConditionalSplit1"
+				},
+				{
+					"name": "AlterRow1"
+				}
+			],
+			"script": "source(output(\n\t\tid as string,\n\t\tname as string,\n\t\t{ city} as string,\n\t\t{ age } as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tid as string,\n\t\tname as string,\n\t\tcity as string,\n\t\tage as string,\n\t\tlast_modified_date as date,\n\t\thash as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source2\nsource1 derive(hash = md5(id+name+{ city}+{ age } ),\n\t\tmodified_date = currentDate()) ~> DerivedColumn1\nDerivedColumn1, source2 lookup(source1@id == source2@id,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 split(isNull(source2@id),\n\tisNull( source2@id) && notEquals(source2@hash, DerivedColumn1@hash),\n\tdisjoint: false) ~> ConditionalSplit1@(new, update, noupdates)\nConditionalSplit1@update alterRow(upsertIf(1==1)) ~> AlterRow1\nConditionalSplit1@new sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tid as string,\n\t\tname as string,\n\t\tcity as string,\n\t\tage as string,\n\t\tlast_modified_date as date,\n\t\thash as string\n\t),\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid = ConditionalSplit1@new@id,\n\t\tname = ConditionalSplit1@new@name,\n\t\tcity,\n\t\tage,\n\t\tlast_modified_date,\n\t\thash = ConditionalSplit1@new@hash\n\t)) ~> sink1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinput(\n\t\tid as string,\n\t\tname as string,\n\t\tcity as string,\n\t\tage as string,\n\t\tlast_modified_date as date,\n\t\thash as string\n\t),\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:false,\n\tupsertable:true,\n\tkeys:['id'],\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\tid = ConditionalSplit1@update@id,\n\t\tname = ConditionalSplit1@update@name,\n\t\tcity = { city},\n\t\tage = { age },\n\t\tlast_modified_date,\n\t\thash = ConditionalSplit1@update@hash\n\t)) ~> sink2"
+		}
+	}
+}

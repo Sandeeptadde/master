@@ -1,0 +1,64 @@
+{
+	"name": "scd2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText6",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "SqlServerTable2",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SqlServerTable2",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"dataset": {
+						"referenceName": "SqlServerTable2",
+						"type": "DatasetReference"
+					},
+					"name": "sink3"
+				}
+			],
+			"transformations": [
+				{
+					"name": "DerivedColumn1"
+				},
+				{
+					"name": "Select1"
+				},
+				{
+					"name": "Lookup2"
+				},
+				{
+					"name": "Filter1"
+				},
+				{
+					"name": "Select2"
+				},
+				{
+					"name": "DerivedColumn2"
+				},
+				{
+					"name": "AlterRow1"
+				}
+			],
+			"script": "source(output(\n\t\temp_id as integer,\n\t\t{ emp_name} as string,\n\t\t{ date_of_birth} as string,\n\t\t{ salary} as integer,\n\t\t{ address} as string,\n\t\t{ grade} as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tsk as integer,\n\t\temp_id as integer,\n\t\temp_name as string,\n\t\tdate_of_birth as string,\n\t\tsalary as integer,\n\t\taddress as string,\n\t\tgrade as string,\n\t\tflag as integer,\n\t\tinsert_datetime as date\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tinferDriftedColumnTypes: true,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source2\nsource1 derive(flag = 1,\n\t\tinsert_datetime = currentDate()) ~> DerivedColumn1\nsource2 select(mapColumn(\n\t\tdbsk = sk,\n\t\tdbemp_id = emp_id,\n\t\tdbemp_name = emp_name,\n\t\tdbdate_of_birth = date_of_birth,\n\t\tdbsalary = salary,\n\t\tdbaddress = address,\n\t\tdbgrade = address,\n\t\tdbflag = flag,\n\t\tdbinsert_datetime = insert_datetime\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nsource1, Select1 lookup(emp_id == dbemp_id,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup2\nLookup2 filter(!isNull(dbemp_id)) ~> Filter1\nFilter1 select(mapColumn(\n\t\tdbsk,\n\t\tdbemp_id,\n\t\tdbemp_name,\n\t\tdbdate_of_birth,\n\t\tdbsalary,\n\t\tdbaddress,\n\t\tdbflag,\n\t\tdbinsert_datetime\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nSelect2 derive(dbflag = 0) ~> DerivedColumn2\nDerivedColumn2 alterRow(updateIf(1==1)) ~> AlterRow1\nAlterRow1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['sk'],\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tsaveOrder: 0,\n\tmapColumn(\n\t\tsk = dbsk,\n\t\temp_id = dbemp_id,\n\t\temp_name = dbemp_name,\n\t\tdate_of_birth = dbdate_of_birth,\n\t\tsalary = dbsalary,\n\t\taddress = dbaddress,\n\t\tflag = dbflag,\n\t\tinsert_datetime = dbinsert_datetime\n\t)) ~> sink2\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\tmapColumn(\n\t\temp_id,\n\t\t{ emp_name},\n\t\t{ date_of_birth},\n\t\t{ salary},\n\t\t{ address},\n\t\t{ grade},\n\t\tflag,\n\t\tinsert_datetime\n\t)) ~> sink3"
+		}
+	}
+}

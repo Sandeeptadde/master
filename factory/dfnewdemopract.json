@@ -1,0 +1,9 @@
+{
+	"name": "dfnewdemopract",
+	"location": "westus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "904b8d95-7f31-43f7-88b1-88b72b5f77be",
+		"tenantId": "62a49398-3809-4590-862e-008f93215711"
+	}
+}

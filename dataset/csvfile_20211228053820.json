@@ -1,0 +1,53 @@
+{
+	"name": "csvfile_20211228053820",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "New folder"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "csvfile_20211228053820.csv",
+				"folderPath": "data_files",
+				"container": "containerfiles"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "emp_id",
+				"type": "String"
+			},
+			{
+				"name": " emp_name",
+				"type": "String"
+			},
+			{
+				"name": " date_of_birth",
+				"type": "String"
+			},
+			{
+				"name": " salary",
+				"type": "String"
+			},
+			{
+				"name": " address",
+				"type": "String"
+			},
+			{
+				"name": " grade",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

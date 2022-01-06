@@ -1,0 +1,25 @@
+{
+	"name": "schedule_trig",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "sched_trig",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 12,
+				"startTime": "2022-01-05T07:08:00",
+				"endTime": "2022-01-06T07:08:00",
+				"timeZone": "India Standard Time"
+			}
+		}
+	}
+}
