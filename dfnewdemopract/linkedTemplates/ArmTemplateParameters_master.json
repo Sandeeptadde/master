@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "dfnewdemopract"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"SqlServer1_connectionString": {
+			"value": ""
+		},
+		"HttpServer1_properties_typeProperties_url": {
+			"value": " https://jsonplaceholder.typicode.com/todos?"
+		},
+		"RestService1_properties_typeProperties_url": {
+			"value": " https://jsonplaceholder.typicode.com/todos?"
+		},
+		"trigger2_properties_typeProperties_scope": {
+			"value": "/subscriptions/641b5bff-a6cd-4108-9375-74638a86ce4b/resourceGroups/pract/providers/Microsoft.Storage/storageAccounts/storageforpract"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
